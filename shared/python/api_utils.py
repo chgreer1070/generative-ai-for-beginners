@@ -6,18 +6,14 @@ proper timeout, error handling, and retry logic.
 """
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from requests.exceptions import RequestException
 
 
 def make_safe_request(
-    url: str,
-    method: str = "GET",
-    timeout: int = 30,
-    retries: int = 3,
-    **kwargs: Any
+    url: str, method: str = "GET", timeout: int = 30, retries: int = 3, **kwargs: Any
 ) -> requests.Response:
     """
     Make an HTTP request with proper timeout and error handling.
@@ -39,16 +35,11 @@ def make_safe_request(
         >>> response = make_safe_request("https://api.example.com/data")
         >>> data = response.json()
     """
-    last_exception: Optional[Exception] = None
+    last_exception: Exception | None = None
 
     for attempt in range(retries):
         try:
-            response = requests.request(
-                method=method,
-                url=url,
-                timeout=timeout,
-                **kwargs
-            )
+            response = requests.request(method=method, url=url, timeout=timeout, **kwargs)
             response.raise_for_status()
             return response
         except RequestException as e:
@@ -62,7 +53,7 @@ def make_safe_request(
     raise last_exception or RequestException("Request failed")
 
 
-def create_openai_client(api_key: Optional[str] = None) -> Any:
+def create_openai_client(api_key: str | None = None) -> Any:
     """
     Create an OpenAI client with proper configuration.
 
@@ -98,9 +89,7 @@ def create_openai_client(api_key: Optional[str] = None) -> Any:
 
 
 def create_azure_openai_client(
-    endpoint: Optional[str] = None,
-    api_key: Optional[str] = None,
-    api_version: str = "2024-02-01"
+    endpoint: str | None = None, api_key: str | None = None, api_version: str = "2024-02-01"
 ) -> Any:
     """
     Create an Azure OpenAI client with proper configuration.
@@ -145,11 +134,7 @@ def create_azure_openai_client(
             "environment variable or pass api_key parameter."
         )
 
-    return AzureOpenAI(
-        azure_endpoint=_endpoint,
-        api_key=_api_key,
-        api_version=api_version
-    )
+    return AzureOpenAI(azure_endpoint=_endpoint, api_key=_api_key, api_version=api_version)
 
 
 def download_image(url: str, save_path: str, timeout: int = 30) -> str:
