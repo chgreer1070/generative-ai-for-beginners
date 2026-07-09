@@ -310,3 +310,15 @@ npm run convert
 - The repository supports multiple API providers: Azure OpenAI, OpenAI, and GitHub Models
 - Content is multilingual with automated translation workflows
 - Active community on Discord for questions and support
+
+## Cursor Cloud specific instructions
+
+Durable, non-obvious notes for future cloud agents (the update script has already installed dependencies):
+
+- **No app to "serve".** There is no web UI, no long-running service, and no automated test suite. "Running the app" means executing an individual lesson sample: a Python script, a Jupyter notebook, a TypeScript console app, or a JS GitHub Models console app. Verify changes by running the relevant sample directly.
+- **Every runnable sample needs an LLM credential; none is preconfigured.** Free path: set `GITHUB_TOKEN` (the fine-grained token must carry the `models` permission) and run the `githubmodels-*` Python scripts or `js-githubmodels/app.js` samples (lessons 06, 07, 08, 11, 20, 21). The `oai-*` / `aoai-*` scripts and all TypeScript apps require paid OpenAI or Azure OpenAI keys. Copy `.env.copy` to `.env` and fill values (git-ignored). Note: the environment's `gh` CLI token does NOT include the `models` permission, so it cannot drive GitHub Models.
+- **Python is installed to the user site** (`python3 -m pip install --user`), not a virtualenv (`python3-venv` is absent on the base image). Console entry points land in `~/.local/bin` (not on `PATH`), but library imports resolve fine with plain `python3`.
+- **Node deps are per-app.** Root `npm install` only covers docs tooling (`docsify-to-pdf`) plus shared SDKs. Each Node/TypeScript sample under lessons 06/07/08/09/11 has its own `package.json` and needs its own `npm install` in that directory before running.
+- **TypeScript apps compile to `dist/`** (see each `tsconfig.json`), even though the `build` script says `rimraf build && tsc` — the `build/` reference is a harmless leftover. Use `npm run build` (compile only, no key needed — good smoke test) and `npm start` (nodemon + ts-node, needs Azure keys).
+- **Lesson-specific `requirements.txt` (06/08/09) pin older, conflicting versions** (e.g. lesson 08 pins `openai<0.29`, `pandas<3.0`). Do not install them over the root deps; use an isolated environment if you must run those specific legacy notebooks.
+- **Lint/build:** there is no local lint command. The only CI check is Markdown validation via the hosted `john0isaac/action-check-markdown` GitHub Action (see `.github/workflows/validate-markdown.yml`), which cannot be reproduced locally.
